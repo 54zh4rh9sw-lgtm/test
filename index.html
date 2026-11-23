@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html data-page-node-id="ffVfaiFXm7pBZf0rIhjAOE" lang="zh-CN">
+<head data-page-node-id="koUaDOwoVpDGZz8JBWcCDH">
+<script data-page-node-id="cBjFT2H3OSIn4pTmIjCsih" src="/page/page_comm/inject.js"></script>
+<meta data-page-node-id="Qg2TbMTUikoxFr8FhX9QCA" charset="utf-8">
+<meta data-page-node-id="ZW90h1HISCG2f7w0HY4Z9v" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<meta data-page-node-id="HF7pWZAjvR0J7HA970jhfw" content="yes" name="apple-mobile-web-app-capable">
+<meta data-page-node-id="auQYPGHoqBamKzNTe7LCnu" content="black-translucent" name="apple-mobile-web-app-status-bar-style">
+<meta data-page-node-id="FXWcD8kL174Vo1hiGPbBAM" content="桌面面板" name="apple-mobile-web-app-title">
+<link data-page-node-id="CKDSe059LXv55WmXgEgiJM" href="icon.png" rel="apple-touch-icon">
+<title data-page-node-id="zYeEUlenIzanQYjmx0g8ql" data-pnid-children="onES84CCj9Nu6O5I9bg5CU">时钟 日历 天气</title>
+<style data-page-node-id="8aQ73pFWTEqC0HPPKXXceP" data-pnid-children="ad7gT4YMLQQZUF6wb8oJES">
+  * { margin: 0; padding: 0; -webkit-box-sizing: border-box; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%;
+    background: #0d1017;
+    color: #f2f4f8;
+    font-family: -apple-system, "PingFang SC", "Heiti SC", "Helvetica Neue", sans-serif;
+    overflow: hidden;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #app {
+    display: -webkit-flex; display: flex;
+    -webkit-flex-direction: column; flex-direction: column;
+    width: 100%; height: 100%;
+  }
+  #main {
+    display: -webkit-flex; display: flex;
+    -webkit-flex-direction: row; flex-direction: row;
+    -webkit-flex: 1 1 auto; flex: 1 1 auto;
+    -webkit-align-items: center; align-items: center;
+    padding: 2vmin 2vmin 0;
+    min-height: 0;
+  }
+  #clock-pane {
+    -webkit-flex: 1.5 1 0%; flex: 1.5 1 0%;
+    text-align: center;
+  }
+  #time {
+    font-size: 21.5vmin;
+    font-weight: 200;
+    line-height: 0.98;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  #time .sec {
+    font-size: 0.3em;
+    color: #6f9bff;
+    font-weight: 300;
+    margin-left: 0.05em;
+    letter-spacing: 0;
+  }
+  #date-line {
+    margin-top: 1.8vmin;
+    font-size: 4.8vmin;
+    font-weight: 300;
+  }
+  #weekday {
+    margin-top: 0.6vmin;
+    font-size: 3.8vmin;
+    color: #8fa3c8;
+    font-weight: 300;
+  }
+  #lunar-line {
+    margin-top: 0.9vmin;
+    font-size: 2.9vmin;
+    color: #d9a15a;
+    font-weight: 300;
+    letter-spacing: 0.1vmin;
+  }
+  #cal-pane {
+    -webkit-flex: 1 1 0%; flex: 1 1 0%;
+    padding-left: 1.2vmin;
+  }
+  #cal-title {
+    font-size: 4vmin;
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: 1vmin;
+    letter-spacing: 0.2vmin;
+  }
+  table#cal {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  #cal th {
+    color: #6f9bff;
+    font-weight: 400;
+    padding: 0.8vmin 0;
+    text-align: center;
+    font-size: 2.8vmin;
+  }
+  #cal th.sun { color: #ff7d7d; }
+  #cal td {
+    text-align: center;
+    padding: 0.55vmin 0;
+    color: #c6ccd8;
+    font-weight: 300;
+    -webkit-border-radius: 0.8vmin;
+    border-radius: 0.8vmin;
+    vertical-align: middle;
+  }
+  #cal td.sun .dnum { color: #ff7d7d; }
+  .dnum {
+    display: block;
+    font-size: 3.05vmin;
+    line-height: 1.2;
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+  }
+  .dsub {
+    display: block;
+    font-size: 1.72vmin;
+    line-height: 1.25;
+    color: #6f7c94;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  #cal td.fest .dsub { color: #ffab5e; }
+  #cal td.term .dsub { color: #45b394; }
+  #cal td.rest .dnum { color: #ff8f5e; }
+  #cal td.work .dnum { color: #8b98ae; }
+  #cal td.today { background: #2b5fd9; }
+  #cal td.today .dnum { color: #fff; font-weight: 600; }
+  #cal td.today .dsub { color: #cfdcff; }
+  /* 纯时钟模式：隐藏日历和天气，时钟铺满全屏 */
+  body.solo #cal-pane, body.solo #weather { display: none; }
+  body.solo #main { -webkit-justify-content: center; justify-content: center; padding: 0 2vmin; }
+  body.solo #clock-pane { -webkit-flex: 1 1 auto; flex: 1 1 auto; cursor: pointer; }
+  #clock-pane { cursor: pointer; }
+  #hint {
+    display: none;
+    position: fixed;
+    right: 2.4vmin; bottom: 1.8vmin;
+    font-size: 1.9vmin;
+    color: #46506a;
+    letter-spacing: 0.05vmin;
+  }
+  #weather {
+    -webkit-flex: 0 0 auto; flex: 0 0 auto;
+    display: -webkit-flex; display: flex;
+    -webkit-flex-direction: row; flex-direction: row;
+    -webkit-align-items: center; align-items: center;
+    margin: 1.6vmin 3.5vmin 2.2vmin;
+    padding: 1.7vmin 2.6vmin;
+    background: #161b26;
+    -webkit-border-radius: 1.6vmin; border-radius: 1.6vmin;
+    min-height: 14vmin;
+  }
+  #wx-now {
+    display: -webkit-flex; display: flex;
+    -webkit-align-items: center; align-items: center;
+    -webkit-flex: 0 0 auto; flex: 0 0 auto;
+    padding-right: 2.6vmin;
+    margin-right: 2.2vmin;
+    border-right: 1px solid #262f42;
+  }
+  #wx-icon { font-size: 7.6vmin; line-height: 1; margin-right: 1.6vmin; }
+  #wx-temp { font-size: 7vmin; font-weight: 200; line-height: 1; }
+  #wx-text { font-size: 2.8vmin; color: #dfe5ef; margin-top: 0.4vmin; }
+  #wx-meta { font-size: 2.2vmin; color: #7d8aa3; margin-top: 0.5vmin; }
+  #wx-days {
+    display: -webkit-flex; display: flex;
+    -webkit-flex-direction: row; flex-direction: row;
+    -webkit-flex: 1 1 0%; flex: 1 1 0%;
+    -webkit-justify-content: space-around; justify-content: space-around;
+  }
+  .wx-day { text-align: center; padding: 0 0.8vmin; white-space: nowrap; }
+  .wx-day .d-name { font-size: 2.3vmin; color: #8fa3c8; white-space: nowrap; }
+  .wx-day .d-icon { font-size: 4vmin; line-height: 1.25; }
+  .wx-day .d-temp { font-size: 2.5vmin; color: #e6eaf2; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .wx-day .d-temp .low { color: #7d8aa3; }
+  #wx-status { font-size: 2vmin; color: #5d6a80; text-align: right; }
+
+  @media (orientation: portrait) {
+    #main {
+      -webkit-flex-direction: column; flex-direction: column;
+      -webkit-justify-content: center; justify-content: center;
+      padding: 2vmin 4vmin 0;
+    }
+    #clock-pane { -webkit-flex: 0 0 auto; flex: 0 0 auto; width: 100%; margin-bottom: 1.4vmin; }
+    #time { font-size: 16vmin; }
+    #time .sec { font-size: 5vmin; }
+    #date-line { font-size: 3.9vmin; margin-top: 1.1vmin; }
+    #weekday { font-size: 3.2vmin; }
+    #lunar-line { font-size: 2.6vmin; margin-top: 0.7vmin; }
+    #cal-pane { -webkit-flex: 0 0 auto; flex: 0 0 auto; width: 100%; padding-left: 0; }
+    #cal-title { font-size: 3.3vmin; margin-bottom: 0.5vmin; }
+    #cal th { font-size: 2.3vmin; padding: 0.4vmin 0; }
+    #cal td { padding: 0.35vmin 0; }
+    .dnum { font-size: 2.75vmin; }
+    .dsub { font-size: 1.5vmin; }
+    #weather { margin: 1.4vmin 4vmin 2.2vmin; padding: 1.5vmin 3vmin; }
+    #wx-icon { font-size: 5.6vmin; }
+    #wx-temp { font-size: 5.6vmin; }
+    #wx-text { font-size: 2.5vmin; }
+    #wx-meta { font-size: 2.1vmin; }
+  }
+</style>
+</head>
+<body data-page-node-id="T6DbSD8ZyeNnd5z3FeX0zq">
+<div data-page-node-id="8rGIvyEBwHGyU2xWI5oBSH" id="app">
+  <div data-page-node-id="VRvv0hCl9OQ8tR0TmCMk9d" id="hint"><!--pnid:LvcsyV9wi5YhTUXqAVYJov-->轻点屏幕返回</div>
+  <div data-page-node-id="JNaSXl2beYcj0TmSDhCrKP" id="main">
+    <div data-page-node-id="umN8Hwk0wVPYwvdJkRR4hr" id="clock-pane">
+      <div data-page-node-id="BBiV7aIgbix6ZDNZpI9M6o" id="time"><span data-page-node-id="Mo7rUPmxm7b0ArwiVkhLtJ" id="time-inner"><span data-page-node-id="rfBLrRCSpB9VsbJkE8JQf8" id="hh"><!--pnid:B6Sm2wkCPrnpM6CDS4JFl6-->--</span><!--pnid:yKOhajZ8NgQlCuRSky4Kwg-->:<span data-page-node-id="2XFM6g5OKje3JwcypQfiwB" id="mm"><!--pnid:uK28geXsvvguz3lm2yhzoP-->--</span><span data-page-node-id="VYXaTE55WK0BP4hV4KBl7U" class="sec" id="ss"><!--pnid:1OM1jjy57eRLxE2HXLemmP-->--</span></span></div>
+      <div data-page-node-id="EmJLaID3BPboTwHYneZksr" id="date-line"><!--pnid:EYGiEMncADhFUME8NRVHbn-->----年--月--日</div>
+      <div data-page-node-id="hQRVddqX68tibyKV8i6CZO" id="weekday"><!--pnid:BdIURYJBKE669so2rWIUx0-->星期-</div>
+      <div data-page-node-id="Vo5VrO8cNp32XdXVhmH87p" id="lunar-line"><!--pnid:W0mN0Sgc8sJSqR2eL88lm3-->&nbsp;</div>
+    </div>
+    <div data-page-node-id="8YpvM85yLWCFTS68OKqvYr" id="cal-pane">
+      <div data-page-node-id="9tMyxFm9TrdZG73cas7GEU" id="cal-title"><!--pnid:N1IVudIymebPKM2P8fujSj-->----年--月</div>
+      <table data-page-node-id="l9QpAIS3p5gP4kfNl1OuCp" id="cal">
+        <thead data-page-node-id="lOWrdBcPnu5A69xvP6RzDW"><tr data-page-node-id="O2HQI0yeGvBcGizGKpPOyK">
+          <th data-page-node-id="cRCM9DCbGyHKaPB2QeTskr" class="sun"><!--pnid:jbOkNNY5mf0UmNegnDodeX-->日</th><th data-page-node-id="8RK3ctTHFM0M2O25lUhWjs"><!--pnid:oDbWvi2dab3xPuZ6fhHIjJ-->一</th><th data-page-node-id="GgdOyOrdQKPLTUqQFfA9rl"><!--pnid:TrWoaNvZUsyFkyZhEMhQCl-->二</th><th data-page-node-id="lwgUFeB69qFraiWStTa0Xb"><!--pnid:shjJJS7zBEUW67ysZ4mI90-->三</th><th data-page-node-id="XZSXyIgZscSvquQlEWUHjk"><!--pnid:ceFdmWnJN21HR1oNGPj1sD-->四</th><th data-page-node-id="uE2hp9JcAELCZh0aC7paCH"><!--pnid:DEzbRacBO51IqTnJvjWgbD-->五</th><th data-page-node-id="EKHhhyXYCbHDTihruaof9A"><!--pnid:F5mgtAg1mWVXEVPhlBTCVK-->六</th>
+        </tr></thead>
+        <tbody data-page-node-id="ljVz5QVd3sC7ap8krLDKuY" id="cal-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div data-page-node-id="0eoimFH1XULMl0BJH7v96V" id="weather">
+    <div data-page-node-id="0gXNALqCjGdtVrGurwuIHd" id="wx-now">
+      <div data-page-node-id="SdZC4PAgmkKOzSkIYS3War" id="wx-icon"><!--pnid:dg2rqevkBrmzJYgcIXND2m-->☁</div>
+      <div data-page-node-id="bh56aHQwFUNH7xhIPqjJs8">
+        <div data-page-node-id="gtEzFieACekpv83hAy0ZPc" id="wx-temp"><!--pnid:XsDp7ajNkUxia4fKELRpVd-->--°</div>
+        <div data-page-node-id="m4INUiuaNAUKJT7UTqjB6O" id="wx-text"><!--pnid:hWMQui1R6Hl8jagk2wLDut-->正在获取天气…</div>
+        <div data-page-node-id="DEJvtrCTdxbYPV5Fv3bivL" id="wx-meta"><!--pnid:nk6uXL3VQFB9dbOIsjK19q-->--</div>
+      </div>
+    </div>
+    <div data-page-node-id="MeCl6KZKfaWb5u6Pj6bA3v" id="wx-days"></div>
+    <div data-page-node-id="HVr1oT4wH6pkyj55kldgco" id="wx-status"></div>
+  </div>
+</div>
+
+<script data-page-node-id="mSFnEfuXch0xE7PLg391QW" data-pnid-children="2nAQ1DXHtTnZjgacJD6trU">
+(function () {
+  "use strict";
+
+  /* ================= 配置：城市 ================= */
+  var CITIES = {
+    "北京":   [39.9042, 116.4074],
+    "上海":   [31.2304, 121.4737],
+    "广州":   [23.1291, 113.2644],
+    "深圳":   [22.5431, 114.0579],
+    "成都":   [30.5728, 104.0668],
+    "杭州":   [30.2741, 120.1551],
+    "南京":   [32.0603, 118.7969],
+    "武汉":   [30.5928, 114.3055],
+    "西安":   [34.3416, 108.9398],
+    "重庆":   [29.5630, 106.5516],
+    "天津":   [39.3434, 117.3616],
+    "苏州":   [31.2989, 120.5853],
+    "郑州":   [34.7466, 113.6254],
+    "长沙":   [28.2282, 112.9388],
+    "青岛":   [36.0671, 120.3826],
+    "沈阳":   [41.8057, 123.4315],
+    "哈尔滨": [45.8038, 126.5349],
+    "福州":   [26.0745, 119.2965],
+    "厦门":   [24.4798, 118.0894],
+    "昆明":   [25.0389, 102.7183],
+    "乌鲁木齐": [43.8256, 87.6168],
+    "香港":   [22.3193, 114.1694],
+    "台北":   [25.0330, 121.5654]
+  };
+  var DEFAULT_CITY = "郑州";
+  var USE_GEO = false;   /* 是否用设备定位：false = 固定城市；想恢复定位改成 true */
+
+  /* ============ 法定节假日：1=放假  0=调休上班 ============
+     数据来源：国务院办公厅关于 2026 年部分节假日安排的通知
+     以后每年照着 markRest / markWork 的写法补几行即可
+  ====================================================== */
+  var HOLIDAYS = {};
+  function markRest(y, m, d1, d2) { for (var d = d1; d <= d2; d++) { HOLIDAYS[y + "-" + m + "-" + d] = 1; } }
+  function markWork(y, m, d) { HOLIDAYS[y + "-" + m + "-" + d] = 0; }
+
+  markRest(2026, 1, 1, 3);   markWork(2026, 1, 4);                              /* 元旦 */
+  markRest(2026, 2, 15, 23); markWork(2026, 2, 14); markWork(2026, 2, 28);      /* 春节 */
+  markRest(2026, 4, 4, 6);                                                      /* 清明 */
+  markRest(2026, 5, 1, 5);   markWork(2026, 5, 9);                              /* 劳动节 */
+  markRest(2026, 6, 19, 21);                                                    /* 端午 */
+  markRest(2026, 9, 25, 27);                                                    /* 中秋 */
+  markRest(2026, 10, 1, 7);  markWork(2026, 9, 20); markWork(2026, 10, 10);     /* 国庆 */
+
+  /* ============ 定位与城市 ============ */
+  var CITY = null;
+  var lastWeather = null;
+  var POS_MAX_AGE = 30 * 24 * 3600 * 1000;   // 定位结果缓存 30 天
+
+  function setCity(name, lat, lon, src) { CITY = { name: name, lat: lat, lon: lon, src: src || "" }; }
+
+  function storePos(lat, lon, name) {
+    try {
+      localStorage.setItem("wx_pos", JSON.stringify({ lat: lat, lon: lon, name: name, ts: new Date().getTime() }));
+    } catch (e) {}
+  }
+  function readPos() {
+    try {
+      var s = localStorage.getItem("wx_pos");
+      if (!s) { return null; }
+      var o = JSON.parse(s);
+      if (!o || !o.lat || !o.lon) { return null; }
+      if (o.ts && (new Date().getTime() - o.ts) > POS_MAX_AGE) { return null; }
+      return o;
+    } catch (e) { return null; }
+  }
+
+  function cityFromQuery() {
+    var m = /[?&]city=([^&]+)/.exec(window.location.search || "");
+    if (!m) { return null; }
+    var n = decodeURIComponent(m[1]);
+    if (!CITIES[n]) { return null; }
+    return { name: n, lat: CITIES[n][0], lon: CITIES[n][1] };
+  }
+
+  function useDefault() {
+    setCity(DEFAULT_CITY, CITIES[DEFAULT_CITY][0], CITIES[DEFAULT_CITY][1], USE_GEO ? "default" : "fixed");
+    loadWeather();
+  }
+
+  /* 用设备定位（不需要任何账号，浏览器会弹一次授权） */
+  function locate(isManual) {
+    if (!navigator.geolocation) { useDefault(); return; }
+    $("wx-text").innerHTML = "正在定位…";
+    $("wx-status").innerHTML = "";
+    navigator.geolocation.getCurrentPosition(function (p) {
+      var lat = p.coords.latitude, lon = p.coords.longitude;
+      setCity("当前位置", lat, lon, "gps");
+      storePos(lat, lon, "当前位置");
+      loadWeather();
+      reverseName(lat, lon);
+    }, function () {
+      if (isManual) { $("wx-text").innerHTML = "定位失败，已用默认城市"; }
+      useDefault();
+    }, { enableHighAccuracy: false, timeout: 20000, maximumAge: isManual ? 0 : 600000 });
+  }
+
+  /* 离线兜底：找最近的已内置城市 */
+  function nearestCity(lat, lon) {
+    var best = "", bestD = 1e9, k;
+    for (k in CITIES) {
+      if (!CITIES.hasOwnProperty(k)) { continue; }
+      var d = distKm(lat, lon, CITIES[k][0], CITIES[k][1]);
+      if (d < bestD) { bestD = d; best = k; }
+    }
+    return bestD <= 150 ? best : "";
+  }
+  function distKm(lat1, lon1, lat2, lon2) {
+    var rad = Math.PI / 180;
+    var dLat = (lat2 - lat1) * rad, dLon = (lon2 - lon1) * rad;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+          + Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function setName(lat, lon, nm) {
+    if (!nm) { return; }
+    CITY.name = nm;
+    storePos(lat, lon, nm);
+    if (lastWeather) { renderWeather(lastWeather); }
+  }
+
+  /* 把经纬度换成城市名：先在线反查，失败则用最近的已内置城市 */
+  function reverseName(lat, lon) {
+    var done = false;
+    function fallback() {
+      if (done) { return; }
+      done = true;
+      setName(lat, lon, nearestCity(lat, lon));
+    }
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=" + lat
+      + "&longitude=" + lon + "&localityLanguage=zh", true);
+    xhr.timeout = 6000;
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) { return; }
+      if (xhr.status !== 200) { fallback(); return; }
+      try {
+        var d = JSON.parse(xhr.responseText);
+        var nm = d.city || d.locality || d.principalSubdivision || "";
+        if (nm) { done = true; setName(lat, lon, nm); } else { fallback(); }
+      } catch (e) { fallback(); }
+    };
+    xhr.ontimeout = fallback;
+    xhr.onerror = fallback;
+    try { xhr.send(); } catch (e) { fallback(); }
+  }
+
+  function initCity() {
+    var q = cityFromQuery();
+    if (q) { setCity(q.name, q.lat, q.lon, "query"); loadWeather(); return; }
+    if (!USE_GEO) { useDefault(); return; }
+    var s = readPos();
+    if (s) { setCity(s.name || "当前位置", s.lat, s.lon, "gps"); loadWeather(); return; }
+    locate(false);
+  }
+
+  function pad2(n) { return (n < 10 ? "0" : "") + n; }
+  function $(id) { return document.getElementById(id); }
+
+  var WEEK = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+  var WEEK_SHORT = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+
+  /* ============ 农历数据表 1900-2099（已逐日校验）============ */
+  var LUNAR_INFO = [0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,
+0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,
+0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,
+0x06566,0x0d4a0,0x0ea50,0x06e95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,
+0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557,
+0x06ca0,0x0b550,0x15355,0x04da0,0x0a5d0,0x14573,0x052b0,0x0a9a8,0x0e950,0x06aa0,
+0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0,
+0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b5a0,0x195a6,
+0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,
+0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x05ac0,0x0ab60,0x096d5,0x092e0,
+0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,
+0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,
+0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,
+0x05aa0,0x076a3,0x096d0,0x04afb,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,
+0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0,
+0x14b63,0x09370,0x049f8,0x04970,0x064b0,0x168a6,0x0ea50,0x06aa0,0x1a6c4,0x0aae0,
+0x092e0,0x0d2e3,0x0c960,0x0d557,0x0d4a0,0x0da50,0x05d55,0x056a0,0x0a6d0,0x055d4,
+0x052d0,0x0a9b8,0x0a950,0x0b4a0,0x0b6a6,0x0ad50,0x055a0,0x0aba4,0x0a5b0,0x052b0,
+0x0b273,0x06930,0x07337,0x06aa0,0x0ad50,0x14b55,0x04b60,0x0a570,0x054e4,0x0d160,
+0x0e968,0x0d520,0x0daa0,0x16aa6,0x056d0,0x04ae0,0x0a9d4,0x0a2d0,0x0d150,0x0f252];
+
+  function lYearDays(y) {
+    var sum = 348, i, info = LUNAR_INFO[y - 1900];
+    for (i = 0x8000; i > 0x8; i >>= 1) { sum += (info & i) ? 1 : 0; }
+    return sum + leapDays(y);
+  }
+  function leapMonth(y) { return LUNAR_INFO[y - 1900] & 0xf; }
+  function leapDays(y) { return leapMonth(y) ? ((LUNAR_INFO[y - 1900] & 0x10000) ? 30 : 29) : 0; }
+  function monthDays(y, m) { return (LUNAR_INFO[y - 1900] & (0x10000 >> m)) ? 30 : 29; }
+
+  function solar2lunar(y, m, d) {
+    var offset = Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(1900, 0, 31)) / 86400000);
+    var i, temp = 0;
+    for (i = 1900; i < 2101 && offset > 0; i++) { temp = lYearDays(i); offset -= temp; }
+    if (offset < 0) { offset += temp; i--; }
+    var lunarYear = i, leap = leapMonth(lunarYear), isLeap = false;
+    for (i = 1; i < 13 && offset > 0; i++) {
+      if (leap > 0 && i === (leap + 1) && !isLeap) { --i; isLeap = true; temp = leapDays(lunarYear); }
+      else { temp = monthDays(lunarYear, i); }
+      if (isLeap && i === (leap + 1)) isLeap = false;
+      offset -= temp;
+    }
+    if (offset === 0 && leap > 0 && i === leap + 1) {
+      if (isLeap) { isLeap = false; } else { isLeap = true; --i; }
+    }
+    if (offset < 0) { offset += temp; --i; }
+    return { year: lunarYear, month: i, day: offset + 1, isLeap: isLeap };
+  }
+
+  var LUNAR_MONTH = ["正", "二", "三", "四", "五", "六", "七", "八", "九", "十", "冬", "腊"];
+  var LUNAR_DAY = ["初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
+                   "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
+                   "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"];
+  var GAN = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
+  var ZHI = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"];
+
+  function lunarMonthName(l) { return (l.isLeap ? "闰" : "") + LUNAR_MONTH[l.month - 1] + "月"; }
+  function lunarDayName(d) { return LUNAR_DAY[d - 1]; }
+
+  /* ============ 二十四节气 ============ */
+  var S_TERM_INFO = [0, 21208, 42467, 63836, 85337, 107014, 128867, 150921,
+                     173149, 195551, 218072, 240693, 263343, 285989, 308563, 331033,
+                     353350, 375494, 397447, 419210, 440795, 462224, 483532, 504758];
+  var S_TERM_NAME = ["小寒", "大寒", "立春", "雨水", "惊蛰", "春分", "清明", "谷雨",
+                     "立夏", "小满", "芒种", "夏至", "小暑", "大暑", "立秋", "处暑",
+                     "白露", "秋分", "寒露", "霜降", "立冬", "小雪", "大雪", "冬至"];
+
+  function termDay(y, n) {
+    var t = new Date((31556925974.7 * (y - 1900) + S_TERM_INFO[n] * 60000) + Date.UTC(1900, 0, 6, 2, 5));
+    return t.getUTCDate();
+  }
+  function termOfDay(y, m, d) {
+    var i1 = (m - 1) * 2, i2 = i1 + 1;
+    if (termDay(y, i1) === d) return S_TERM_NAME[i1];
+    if (termDay(y, i2) === d) return S_TERM_NAME[i2];
+    return "";
+  }
+
+  /* ============ 节日 ============ */
+  var SOLAR_FEST = {
+    "1-1": "元旦", "2-14": "情人节", "3-8": "妇女节", "3-12": "植树节",
+    "5-1": "劳动节", "5-4": "青年节", "6-1": "儿童节", "7-1": "建党节",
+    "8-1": "建军节", "9-10": "教师节", "10-1": "国庆节", "12-25": "圣诞节"
+  };
+  var LUNAR_FEST = {
+    "1-1": "春节", "1-15": "元宵节", "2-2": "龙抬头", "5-5": "端午节",
+    "7-7": "七夕节", "7-15": "中元节", "8-15": "中秋节", "9-9": "重阳节",
+    "12-8": "腊八节", "12-23": "小年"
+  };
+
+  function nthSunday(y, m, n) {
+    var first = new Date(y, m - 1, 1).getDay();
+    return 1 + ((7 - first) % 7) + (n - 1) * 7;
+  }
+
+  function festivalOf(y, m, d, l) {
+    var key = m + "-" + d;
+    if (SOLAR_FEST[key]) return SOLAR_FEST[key];
+    if (m === 5 && d === nthSunday(y, 5, 2)) return "母亲节";
+    if (m === 6 && d === nthSunday(y, 6, 3)) return "父亲节";
+    if (!l.isLeap) {
+      var lk = l.month + "-" + l.day;
+      if (LUNAR_FEST[lk]) return LUNAR_FEST[lk];
+    }
+    var nxt = solar2lunar(y, m, d + 1);
+    if (nxt.month === 1 && nxt.day === 1 && !nxt.isLeap) return "除夕";
+    return "";
+  }
+
+  /* ============ 时钟字号自适应：撑满可用空间 ============ */
+  function fitClock() {
+    var pane = $("clock-pane"), inner = $("time-inner"), box = $("main"), el = $("time");
+    if (!pane || !inner || !box) { return; }
+    var availW = pane.clientWidth - 2;
+    var availH = box.clientHeight - 4;
+    var cal = $("cal-pane");
+    if (cal && cal.offsetParent && box.clientWidth < box.clientHeight) {
+      availH = availH - cal.offsetHeight - 10;
+    }
+    if (availW <= 20 || availH <= 20) { return; }
+    var lo = 40, hi = 520, best = 40, k, mid;
+    for (k = 0; k < 20; k++) {
+      mid = (lo + hi) / 2;
+      el.style.fontSize = mid + "px";
+      if (inner.getBoundingClientRect().width <= availW && pane.offsetHeight <= availH) {
+        best = mid; lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    el.style.fontSize = Math.floor(best) + "px";
+  }
+
+  /* ============ 时钟 + 日历 ============ */
+  var lastDayKey = "";
+
+  function tick() {
+    var now = new Date();
+    var y = now.getFullYear(), m = now.getMonth() + 1, d = now.getDate();
+
+    $("hh").innerHTML = pad2(now.getHours());
+    $("mm").innerHTML = pad2(now.getMinutes());
+    $("ss").innerHTML = pad2(now.getSeconds());
+    $("date-line").innerHTML = y + "年" + m + "月" + d + "日";
+    $("weekday").innerHTML = WEEK[now.getDay()];
+
+    var l = solar2lunar(y, m, d);
+    var gz = GAN[(l.year - 4) % 10] + ZHI[(l.year - 4) % 12];
+    var extra = festivalOf(y, m, d, l) || termOfDay(y, m, d);
+    $("lunar-line").innerHTML = "农历" + lunarMonthName(l) + lunarDayName(l.day)
+      + (extra ? " · " + extra : "") + " · " + gz + "年";
+
+    var key = y + "-" + m + "-" + d;
+    if (key !== lastDayKey) {
+      lastDayKey = key;
+      buildCalendar(y, m, d);
+      fitClock();
+      if (!weatherLoaded) { loadWeather(); }
+    }
+  }
+
+  function buildCalendar(y, m, today) {
+    $("cal-title").innerHTML = y + "年" + m + "月";
+    var firstDay = new Date(y, m - 1, 1).getDay();
+    var days = new Date(y, m, 0).getDate();
+    var html = "<tr>", cell = 0, i;
+
+    function dayCell(d) {
+      var wd = new Date(y, m - 1, d).getDay();
+      var l = solar2lunar(y, m, d);
+      var fest = festivalOf(y, m, d, l);
+      var term = termOfDay(y, m, d);
+      var sub, kind = "";
+      if (fest) { sub = fest; kind = "fest"; }
+      else if (term) { sub = term; kind = "term"; }
+      else if (l.day === 1) { sub = lunarMonthName(l); }
+      else { sub = lunarDayName(l.day); }
+
+      var cls = [];
+      if (wd === 0) { cls.push("sun"); }
+      if (d === today) { cls.push("today"); }
+      if (kind) { cls.push(kind); }
+      var hk = y + "-" + m + "-" + d;
+      if (HOLIDAYS[hk] === 1) { cls.push("rest"); }
+      if (HOLIDAYS[hk] === 0) { cls.push("work"); }
+
+      return '<td class="' + cls.join(" ") + '"><span class="dnum">' + d
+        + '</span><span class="dsub">' + sub + "</span></td>";
+    }
+
+    for (i = 0; i < firstDay; i++) { html += "<td></td>"; cell++; }
+    for (i = 1; i <= days; i++) {
+      html += dayCell(i);
+      cell++;
+      if (cell % 7 === 0 && i < days) { html += "</tr><tr>"; }
+    }
+    while (cell % 7 !== 0) { html += "<td></td>"; cell++; }
+    html += "</tr>";
+    $("cal-body").innerHTML = html;
+  }
+
+  /* ============ 天气 ============ */
+  var weatherLoaded = false;
+
+  function wxInfo(code) {
+    if (code === 0)  { return { t: "晴",       i: "☀️" }; }
+    if (code === 1)  { return { t: "晴间多云", i: "🌤" }; }
+    if (code === 2)  { return { t: "多云",     i: "⛅" }; }
+    if (code === 3)  { return { t: "阴",       i: "☁️" }; }
+    if (code === 45 || code === 48) { return { t: "雾", i: "🌫" }; }
+    if (code >= 51 && code <= 57)   { return { t: "毛毛雨", i: "🌦" }; }
+    if (code >= 61 && code <= 65)   { return { t: "雨",   i: "🌧" }; }
+    if (code === 66 || code === 67) { return { t: "冻雨", i: "🌧" }; }
+    if (code >= 71 && code <= 77)   { return { t: "雪",   i: "🌨" }; }
+    if (code >= 80 && code <= 82)   { return { t: "阵雨", i: "🌦" }; }
+    if (code === 85 || code === 86) { return { t: "阵雪", i: "🌨" }; }
+    if (code === 95)                { return { t: "雷阵雨", i: "⛈" }; }
+    if (code === 96 || code === 99) { return { t: "雷阵雨伴冰雹", i: "⛈" }; }
+    return { t: "未知", i: "☁️" };
+  }
+
+  function loadWeather() {
+    if (!CITY) { return; }
+    var url = "https://api.open-meteo.com/v1/forecast"
+      + "?latitude=" + CITY.lat
+      + "&longitude=" + CITY.lon
+      + "&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m"
+      + "&daily=weather_code,temperature_2m_max,temperature_2m_min"
+      + "&timezone=Asia%2FShanghai&forecast_days=4";
+
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.timeout = 15000;
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState !== 4) { return; }
+      if (xhr.status === 200) {
+        try {
+          renderWeather(JSON.parse(xhr.responseText));
+          weatherLoaded = true;
+        } catch (e) {
+          $("wx-text").innerHTML = "天气数据解析失败";
+        }
+      } else {
+        $("wx-text").innerHTML = "天气获取失败（请检查网络）";
+        $("wx-status").innerHTML = "";
+      }
+    };
+    xhr.ontimeout = function () { $("wx-text").innerHTML = "天气获取超时"; };
+    try { xhr.send(); } catch (e) { $("wx-text").innerHTML = "无法联网"; }
+  }
+
+  function renderWeather(d) {
+    lastWeather = d;
+    var c = d.current, dl = d.daily;
+    var info = wxInfo(c.weather_code);
+    $("wx-icon").innerHTML = info.i;
+    $("wx-temp").innerHTML = Math.round(c.temperature_2m) + "°";
+    $("wx-text").innerHTML = CITY.name + " · " + info.t;
+    $("wx-meta").innerHTML = "体感 " + Math.round(c.apparent_temperature) + "° ｜ 湿度 "
+      + Math.round(c.relative_humidity_2m) + "% ｜ 风 " + Math.round(c.wind_speed_10m) + " km/h"
+      + (CITY.src === "default" ? " ｜ 未定位" : "");
+
+    var html = "", n = dl.time.length, i;
+    for (i = 0; i < n && i < 4; i++) {
+      var di = new Date(dl.time[i] + "T00:00:00");
+      var nm;
+      if (i === 0) { nm = "今天"; }
+      else if (i === 1) { nm = "明天"; }
+      else if (i === 2) { nm = "后天"; }
+      else { nm = WEEK_SHORT[di.getDay()]; }
+      var ii = wxInfo(dl.weather_code[i]);
+      html += '<div class="wx-day">'
+        + '<div class="d-name">' + nm + '</div>'
+        + '<div class="d-icon">' + ii.i + '</div>'
+        + '<div class="d-temp">' + Math.round(dl.temperature_2m_max[i]) + '°'
+        + ' <span class="low">' + Math.round(dl.temperature_2m_min[i]) + '°</span></div>'
+        + '</div>';
+    }
+    $("wx-days").innerHTML = html;
+    var now = new Date();
+    $("wx-status").innerHTML = "更新 " + pad2(now.getHours()) + ":" + pad2(now.getMinutes());
+  }
+
+  /* 轻点天气栏：重新定位 */
+  $("weather").addEventListener("click", function () {
+    if (USE_GEO) { locate(true); } else { loadWeather(); }
+  }, false);
+  $("weather").style.cursor = "pointer";
+
+  /* ============ 纯时钟模式切换 ============ */
+  var solo = false;
+  function setSolo(v) {
+    solo = v;
+    document.body.className = v ? "solo" : "";
+    $("hint").style.display = v ? "block" : "none";
+    setTimeout(fitClock, 60);
+  }
+  function toggleSolo() { setSolo(!solo); }
+  $("clock-pane").addEventListener("click", toggleSolo, false);
+
+  /* ============ 启动 ============ */
+  tick();
+  fitClock();
+  setTimeout(fitClock, 300);
+  setTimeout(fitClock, 1200);
+  window.addEventListener("resize", fitClock, false);
+  window.addEventListener("orientationchange", function () {
+    setTimeout(fitClock, 250);
+  }, false);
+  if (/[?&]solo=1/.test(window.location.search || "")) { setSolo(true); }
+  setInterval(tick, 1000);
+  initCity();
+  setInterval(function () { if (CITY) { loadWeather(); } }, 10 * 60 * 1000);
+})();
+</script>
+</body>
+</html>
